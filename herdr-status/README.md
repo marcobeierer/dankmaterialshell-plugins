@@ -23,11 +23,17 @@ widget does not acknowledge results or change Herdr focus.
   number of agents in that state. Priority is blocked, unread completed, working,
   unknown, then idle. An empty session shows a green bot without a count.
 - **Every status:** separate bots in **green → yellow → red → blue** order
-  (idle, working, blocked, unread completed), each with a count, including zero.
+  (idle, working, blocked, unread completed), each with a count, including zero
+  by default. Enable **Hide zero-count statuses** to show only states with agents.
   A gray bot is appended when agents have unknown status.
 
 Icons run across horizontal bars and stack on vertical bars. In either mode, a
 connection failure shows a single gray bot without stale counts.
+
+**Always hide idle status** removes the green icon in both modes, even when
+there are idle agents. If no icons remain, the widget keeps a blank clickable
+area for opening its agent list and settings. Otherwise, an empty session keeps
+an idle icon when zero-count statuses are hidden.
 
 ### Screenshots
 
@@ -103,6 +109,11 @@ Open **Settings → Plugins → Herdr Status** to configure:
   different session. This widget does not aggregate multiple named sessions or
   saved SSH machines.
 - **Refresh interval:** 1–30 seconds.
+- **Override status colors:** off by default, following the DMS theme. Enable
+  to show color pickers for idle, working, needs attention, results ready,
+  unknown, and disconnected states. These colors apply to every Herdr widget
+  and its agent list. Disable the override to restore theme colors without
+  clearing your saved choices. States without a saved color still use the theme.
 
 The widget's child process clears inherited `HERDR_SOCKET_PATH` and
 `HERDR_SESSION` overrides so session selection is explicit. Custom Herdr config
@@ -114,12 +125,14 @@ locations via `HERDR_CONFIG_PATH` still follow the desktop environment.
 2. Click the **gear icon** next to the close button to open the dedicated settings
    view.
 3. Toggle **Show every status** to switch display modes.
-4. Click the **back arrow** to return to the agent list, or close the popout.
+4. Optionally enable **Hide zero-count statuses** in every-status mode.
+5. Optionally enable **Always hide idle status** in either mode.
+6. Click the **back arrow** to return to the agent list, or close the popout.
 
 Changes are saved automatically on that widget's DankBar entry and survive
-reloads and restarts. Different widgets can use different display modes. Widgets
-sharing the same bar entry across monitors share this setting. Display mode is
-not a global plugin setting.
+reloads and restarts. Different widgets can use different display settings. Widgets
+sharing the same bar entry across monitors share these settings. Display settings
+are not global plugin settings.
 
 ## Status semantics
 

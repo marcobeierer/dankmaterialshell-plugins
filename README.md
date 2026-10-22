@@ -6,6 +6,24 @@ contains the registry catalog; plugin source lives in its own subdirectory.
 
 ## Plugins
 
+### [Window Picker](window-picker/)
+
+A shortcut-triggered window picker for **Hyprland** and **Niri**. Lists open windows
+grouped by workspace, with live search across titles, applications, workspaces,
+and outputs. Select with arrow keys or Tab, then press Enter to switch workspace
+and focus the window. Requires DankMaterialShell **1.6.2+**; no bar widget or helper
+daemon is needed.
+
+Install with `dms plugins install windowPicker`, or run
+`./window-picker/install.sh` from a local checkout. Enable **Window Picker** in
+**Settings → Plugins**, then bind a shortcut to:
+
+```sh
+dms ipc call windowPicker toggle
+```
+
+See the [Window Picker README](window-picker/README.md) for shortcut examples.
+
 ### [Herdr Status](herdr-status/)
 
 A native DankBar widget that monitors agents in one local Herdr session.

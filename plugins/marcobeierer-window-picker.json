@@ -1,0 +1,14 @@
+{
+    "id": "windowPicker",
+    "name": "Window Picker",
+    "capabilities": ["daemon"],
+    "category": "utilities",
+    "repo": "https://github.com/marcobeierer/dankmaterialshell-plugins",
+    "path": "window-picker",
+    "author": "Marco Beierer",
+    "description": "Search open windows grouped by workspace, then switch to and focus the selected window.",
+    "dependencies": [],
+    "compositors": ["hyprland", "niri"],
+    "distro": ["any"],
+    "requires_dms": ">=1.6.2"
+}

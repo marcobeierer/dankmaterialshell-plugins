@@ -39,6 +39,56 @@ PluginSettings {
         unit: "s"
     }
 
+    ToggleSetting {
+        id: customColorsToggle
+        settingKey: "useCustomColors"
+        label: "Override status colors"
+        description: "Use custom colors for all Herdr widgets and agent lists. Turn off to follow the DMS theme without losing your saved colors."
+        defaultValue: false
+    }
+
+    ColorSetting {
+        settingKey: "idleColor"
+        label: "Idle color"
+        defaultValue: Theme.success
+        visible: customColorsToggle.value
+    }
+
+    ColorSetting {
+        settingKey: "workingColor"
+        label: "Working color"
+        defaultValue: Theme.warning
+        visible: customColorsToggle.value
+    }
+
+    ColorSetting {
+        settingKey: "blockedColor"
+        label: "Needs attention color"
+        defaultValue: Theme.error
+        visible: customColorsToggle.value
+    }
+
+    ColorSetting {
+        settingKey: "doneColor"
+        label: "Results ready color"
+        defaultValue: Theme.info
+        visible: customColorsToggle.value
+    }
+
+    ColorSetting {
+        settingKey: "unknownColor"
+        label: "Unknown status color"
+        defaultValue: Theme.surfaceVariantText
+        visible: customColorsToggle.value
+    }
+
+    ColorSetting {
+        settingKey: "offlineColor"
+        label: "Disconnected color"
+        defaultValue: Theme.surfaceVariantText
+        visible: customColorsToggle.value
+    }
+
     StyledText {
         width: parent.width
         text: "Click the widget for agent details. Right-click to refresh. Viewing the popout does not mark results as read."

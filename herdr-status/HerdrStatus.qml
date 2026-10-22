@@ -16,6 +16,8 @@ PluginComponent {
     readonly property string session: String(pluginData.session || "").trim()
     readonly property int pollSeconds: Math.max(1, Math.min(30, Number(pluginData.pollSeconds) || 2))
     readonly property bool showEveryStatus: widgetData?.showEveryStatus ?? false
+    readonly property bool hideZeroCounts: widgetData?.hideZeroCounts ?? false
+    readonly property bool hideIdle: widgetData?.hideIdle ?? false
     readonly property int widgetEntryIndex: {
         const entries = barConfig?.[section + "Widgets"] || [];
         // DankBar gives each entry a runtime ID formed from its saved ID and index.
@@ -34,12 +36,16 @@ PluginComponent {
     readonly property string status: errorText ? "offline" : (snapshot ? snapshot.state : "offline")
     readonly property var agents: errorText || !snapshot ? [] : snapshot.agents
     readonly property var barStates: {
-        if (!showEveryStatus || errorText || !snapshot)
+        if (errorText || !snapshot)
             return [status];
+        if (!showEveryStatus)
+            return hideIdle && status === "idle" ? [] : [status];
         const states = ["idle", "working", "blocked", "done"];
         if (snapshot.counts.unknown > 0)
             states.push("unknown");
-        return states;
+        const visibleStates = states.filter(state => (!hideIdle || state !== "idle")
+            && (!hideZeroCounts || snapshot.counts[state] > 0));
+        return visibleStates.length || hideIdle ? visibleStates : [status];
     }
     readonly property string summary: {
         if (errorText)
@@ -53,6 +59,9 @@ PluginComponent {
     }
 
     function statusColor(state) {
+        const customColor = pluginData.useCustomColors ? pluginData[state + "Color"] : null;
+        if (typeof customColor === "string" && customColor)
+            return customColor;
         switch (state) {
         case "blocked": return Theme.error;
         case "done": return Theme.info;
@@ -62,7 +71,7 @@ PluginComponent {
         }
     }
 
-    function setShowEveryStatus(value) {
+    function setDisplaySetting(settingKey, value) {
         if (!barConfig?.id || widgetEntryIndex < 0)
             return;
         const key = section + "Widgets";
@@ -76,7 +85,7 @@ PluginComponent {
         if (widgetData.id !== id + "_" + index)
             return;
         entries[index] = Object.assign({}, typeof entry === "string" ? { id: entry } : entry, {
-            showEveryStatus: value
+            [settingKey]: value
         });
         SettingsData.updateBarConfig(barConfig.id, { [key]: entries });
     }
@@ -163,42 +172,48 @@ PluginComponent {
         StatusPill { vertical: true }
     }
 
-    component StatusPill: Grid {
+    component StatusPill: Item {
         property bool vertical: false
 
-        columns: vertical ? 1 : root.barStates.length
-        spacing: Theme.spacingS
+        implicitWidth: Math.max(root.iconSize, statusGrid.implicitWidth)
+        implicitHeight: Math.max(root.iconSize, statusGrid.implicitHeight)
         Accessible.name: "Herdr: " + Status.label(root.status) + ". " + root.summary
 
-        Repeater {
-            model: root.barStates
+        Grid {
+            id: statusGrid
+            columns: vertical ? 1 : Math.max(1, root.barStates.length)
+            spacing: Theme.spacingS
 
-            delegate: Item {
-                required property string modelData
-                readonly property int count: root.snapshot && !root.errorText
-                    ? (root.snapshot.counts[modelData] || 0) : 0
+            Repeater {
+                model: root.barStates
 
-                implicitWidth: root.iconSize + (countText.visible ? countText.implicitWidth + 2 : 0)
-                implicitHeight: root.iconSize
-                Accessible.name: Status.label(modelData) + ": " + count
+                delegate: Item {
+                    required property string modelData
+                    readonly property int count: root.snapshot && !root.errorText
+                        ? (root.snapshot.counts[modelData] || 0) : 0
 
-                DankIcon {
-                    anchors.left: parent.left
-                    anchors.verticalCenter: parent.verticalCenter
-                    name: "smart_toy"
-                    size: root.iconSize
-                    color: root.statusColor(modelData)
-                }
+                    implicitWidth: root.iconSize + (countText.visible ? countText.implicitWidth + 2 : 0)
+                    implicitHeight: root.iconSize
+                    Accessible.name: Status.label(modelData) + ": " + count
 
-                StyledText {
-                    id: countText
-                    anchors.top: parent.top
-                    anchors.right: parent.right
-                    visible: parent.count > 0 || (root.showEveryStatus && !root.errorText && root.snapshot !== null)
-                    text: parent.count
-                    font.pixelSize: Math.max(9, Math.round(root.iconSize * 0.45))
-                    font.weight: Font.Medium
-                    color: Theme.surfaceText
+                    DankIcon {
+                        anchors.left: parent.left
+                        anchors.verticalCenter: parent.verticalCenter
+                        name: "smart_toy"
+                        size: root.iconSize
+                        color: root.statusColor(modelData)
+                    }
+
+                    StyledText {
+                        id: countText
+                        anchors.top: parent.top
+                        anchors.right: parent.right
+                        visible: parent.count > 0 || (root.showEveryStatus && !root.errorText && root.snapshot !== null)
+                        text: parent.count
+                        font.pixelSize: Math.max(9, Math.round(root.iconSize * 0.45))
+                        font.weight: Font.Medium
+                        color: Theme.surfaceText
+                    }
                 }
             }
         }
@@ -226,11 +241,19 @@ PluginComponent {
                 }
             }
 
-            Column {
+            Flickable {
                 width: parent.width
                 visible: popout.showSettings
-                height: visible ? implicitHeight : 0
-                spacing: Theme.spacingM
+                height: visible ? Math.max(0, root.popoutHeight - popout.headerHeight
+                    - popout.detailsHeight - Theme.spacingXL) : 0
+                contentHeight: settingsContent.implicitHeight
+                clip: true
+                boundsBehavior: Flickable.StopAtBounds
+
+                Column {
+                    id: settingsContent
+                    width: parent.width
+                    spacing: Theme.spacingM
 
                 Row {
                     width: parent.width
@@ -253,16 +276,83 @@ PluginComponent {
                         enabled: root.widgetEntryIndex >= 0
                         checked: root.showEveryStatus
                         Accessible.name: "Show every status"
-                        onToggled: isChecked => root.setShowEveryStatus(isChecked)
+                        onToggled: isChecked => root.setDisplaySetting("showEveryStatus", isChecked)
                     }
                 }
 
                 StyledText {
                     width: parent.width
-                    text: "Show separate colored bot icons and counts for blocked, ready, working, and idle agents, including zero counts. Unknown agents appear separately when present. Changes are saved automatically."
+                    text: "Show separate colored bot icons and counts for blocked, ready, working, and idle agents. Unknown agents appear separately when present. Changes are saved automatically."
                     font.pixelSize: Theme.fontSizeSmall
                     color: Theme.surfaceVariantText
                     wrapMode: Text.WordWrap
+                }
+
+                Row {
+                    width: parent.width
+                    height: Math.max(hideZeroCountsLabel.implicitHeight, hideZeroCountsToggle.height)
+                    spacing: Theme.spacingM
+
+                    StyledText {
+                        id: hideZeroCountsLabel
+                        width: parent.width - hideZeroCountsToggle.width - Theme.spacingM
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: "Hide zero-count statuses"
+                        font.pixelSize: Theme.fontSizeSmall
+                        color: Theme.surfaceText
+                        wrapMode: Text.WordWrap
+                    }
+
+                    DankToggle {
+                        id: hideZeroCountsToggle
+                        anchors.verticalCenter: parent.verticalCenter
+                        enabled: root.widgetEntryIndex >= 0 && root.showEveryStatus
+                        checked: root.hideZeroCounts
+                        Accessible.name: "Hide zero-count statuses"
+                        onToggled: isChecked => root.setDisplaySetting("hideZeroCounts", isChecked)
+                    }
+                }
+
+                StyledText {
+                    width: parent.width
+                    text: "In every-status mode, hide icons with no agents."
+                    font.pixelSize: Theme.fontSizeSmall
+                    color: Theme.surfaceVariantText
+                    wrapMode: Text.WordWrap
+                }
+
+                Row {
+                    width: parent.width
+                    height: Math.max(hideIdleLabel.implicitHeight, hideIdleToggle.height)
+                    spacing: Theme.spacingM
+
+                    StyledText {
+                        id: hideIdleLabel
+                        width: parent.width - hideIdleToggle.width - Theme.spacingM
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: "Always hide idle status"
+                        font.pixelSize: Theme.fontSizeSmall
+                        color: Theme.surfaceText
+                        wrapMode: Text.WordWrap
+                    }
+
+                    DankToggle {
+                        id: hideIdleToggle
+                        anchors.verticalCenter: parent.verticalCenter
+                        enabled: root.widgetEntryIndex >= 0
+                        checked: root.hideIdle
+                        Accessible.name: "Always hide idle status"
+                        onToggled: isChecked => root.setDisplaySetting("hideIdle", isChecked)
+                    }
+                }
+
+                StyledText {
+                    width: parent.width
+                    text: "Hide the green icon in both display modes, even with idle agents. If no icons remain, click the blank widget area to access settings."
+                    font.pixelSize: Theme.fontSizeSmall
+                    color: Theme.surfaceVariantText
+                    wrapMode: Text.WordWrap
+                }
                 }
             }
 

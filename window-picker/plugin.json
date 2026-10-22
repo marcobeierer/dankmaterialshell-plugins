@@ -1,0 +1,15 @@
+{
+  "id": "windowPicker",
+  "name": "Window Picker",
+  "description": "Search open windows grouped by workspace, then switch to and focus the selected window.",
+  "version": "1.0.0",
+  "author": "Marco Beierer",
+  "homepage": "https://github.com/marcobeierer/dankmaterialshell-plugins",
+  "license": "MIT",
+  "icon": "window",
+  "type": "daemon",
+  "capabilities": ["daemon"],
+  "component": "./WindowPicker.qml",
+  "requires_dms": ">=1.6.2",
+  "permissions": []
+}
