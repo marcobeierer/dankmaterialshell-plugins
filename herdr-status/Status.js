@@ -46,13 +46,3 @@ function label(state) {
     default: return "Disconnected";
     }
 }
-
-function icon(state) {
-    switch (state) {
-    case "blocked": return "front_hand";
-    case "done": return "task_alt";
-    case "working": return "pending";
-    case "idle": return "smart_toy";
-    default: return "help_outline";
-    }
-}

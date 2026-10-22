@@ -4,17 +4,30 @@ A native DankBar widget for all agents in one local **Herdr** session, regardles
 of which coding agent they use. No OpenCode plugin, helper daemon, package
 installation, or configuration changes to Herdr are required.
 
-| Color | Meaning |
+| Color | Agent status |
 | --- | --- |
-| Green | All agents idle, or no agents running |
+| Green | Idle |
+| Yellow | Working |
 | Red | An agent is blocked and needs attention |
 | Blue | An agent has unread completed results |
-| Yellow | An agent is working |
 | Gray | Herdr is unavailable or an agent's status is unknown |
 
-The bar shows the number of agents in the displayed state. Click for a scrollable
-agent list, or right-click to refresh. It refreshes every two seconds by default.
-Opening the widget does not acknowledge results or change Herdr focus.
+Each status uses the same bot icon, with color indicating its state and a small
+superscript number showing the agent count. Click for a scrollable agent list,
+or right-click to refresh. It refreshes every two seconds by default. Opening the
+widget does not acknowledge results or change Herdr focus.
+
+## Display modes
+
+- **Single status (default):** one bot for the highest-priority status, with the
+  number of agents in that state. Priority is blocked, unread completed, working,
+  unknown, then idle. An empty session shows a green bot without a count.
+- **Every status:** separate bots in **green → yellow → red → blue** order
+  (idle, working, blocked, unread completed), each with a count, including zero.
+  A gray bot is appended when agents have unknown status.
+
+Icons run across horizontal bars and stack on vertical bars. In either mode, a
+connection failure shows a single gray bot without stale counts.
 
 ## Install
 
@@ -40,7 +53,11 @@ Add it to your DankBar layout. Both horizontal and vertical bars are supported.
 If DMS uses a different configuration directory, pass its `plugins/` subdirectory
 to the installer instead (newer Dux Shell releases use `~/.config/dms`).
 
-In the plugin settings:
+## Settings
+
+### Global plugin settings
+
+Open **Settings → Plugins → Herdr Status** to configure:
 
 - **Herdr executable:** defaults to `herdr`. If it is not on DMS's `PATH`, use
   the absolute path returned by `command -v herdr`, for example
@@ -50,11 +67,23 @@ In the plugin settings:
   different session. This widget does not aggregate multiple named sessions or
   saved SSH machines.
 - **Refresh interval:** 1–30 seconds.
-- **Show Herdr label:** hide the label for a more compact pill.
 
 The widget's child process clears inherited `HERDR_SOCKET_PATH` and
 `HERDR_SESSION` overrides so session selection is explicit. Custom Herdr config
 locations via `HERDR_CONFIG_PATH` still follow the desktop environment.
+
+### Per-widget display settings
+
+1. Click the bot icon to open the agent list.
+2. Click the **gear icon** next to the close button to open the dedicated settings
+   view.
+3. Toggle **Show every status** to switch display modes.
+4. Click the **back arrow** to return to the agent list, or close the popout.
+
+Changes are saved automatically on that widget's DankBar entry and survive
+reloads and restarts. Different widgets can use different display modes. Widgets
+sharing the same bar entry across monitors share this setting. Display mode is
+not a global plugin setting.
 
 ## Status semantics
 
@@ -78,4 +107,9 @@ After editing the plugin, reload it with:
 dms ipc call plugin-scan reload herdrStatus
 ```
 
-No shell restart or installation has been performed by creating these files.
+If plugin settings still show an older version after editing their QML file,
+fully restart DMS; reloading the plugin may leave the settings component cached.
+
+## License
+
+[MIT](../LICENSE) © 2026 Marco Beierer.

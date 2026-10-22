@@ -39,15 +39,9 @@ PluginSettings {
         unit: "s"
     }
 
-    ToggleSetting {
-        settingKey: "showLabel"
-        label: "Show Herdr label"
-        defaultValue: true
-    }
-
     StyledText {
         width: parent.width
-        text: "Click the widget for agent details. Right-click to refresh. Viewing this popout does not mark results as read."
+        text: "Click the widget for agent details. Right-click to refresh. Viewing the popout does not mark results as read."
         font.pixelSize: Theme.fontSizeSmall
         color: Theme.surfaceVariantText
         wrapMode: Text.WordWrap

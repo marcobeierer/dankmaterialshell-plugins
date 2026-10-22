@@ -1,15 +1,17 @@
 {
   "id": "herdrStatus",
   "name": "Herdr Status",
-  "description": "See idle, working, blocked, and unread completed agents in DankBar.",
-  "version": "0.1.0",
+  "description": "Monitor local Herdr agents in DankBar with colored bot icons, status counts, and per-widget display settings.",
+  "version": "1.0.0",
   "author": "Marco Beierer",
-  "homepage": "https://www.marcobeierer.com",
+  "homepage": "https://github.com/marcobeierer/dankmaterialshell-plugins",
+  "license": "MIT",
   "icon": "smart_toy",
   "type": "widget",
   "capabilities": ["dankbar-widget"],
   "component": "./HerdrStatus.qml",
   "settings": "./HerdrSettings.qml",
   "requires_dms": ">=1.6.0",
-  "permissions": ["settings_read", "settings_write"]
+  "dependencies": ["herdr"],
+  "permissions": ["settings_read", "settings_write", "process"]
 }
