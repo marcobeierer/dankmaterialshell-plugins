@@ -1,6 +1,8 @@
 # DankMaterialShell Plugins
 
-Plugins for [DankMaterialShell](https://danklinux.com/).
+Plugins and an installable registry for
+[DankMaterialShell](https://danklinux.com/). The [`plugins/`](plugins/) directory
+contains the registry catalog; plugin source lives in its own subdirectory.
 
 ## Plugins
 
@@ -27,6 +29,36 @@ Requires Linux, DankMaterialShell **1.6+**, and a running Herdr **0.9.3+** sessi
 
 ## Installation
 
+### From this registry
+
+Add the registry once, then install the plugin:
+
+```sh
+dms registry add marcobeierer https://github.com/marcobeierer/dankmaterialshell-plugins.git
+dms plugins install herdrStatus
+```
+
+The repository's `main` branch must contain the catalog entry before DMS can
+discover the plugin. Herdr must be installed separately and running.
+
+If your DMS build does not expose `dms registry add`, configure it through
+`${XDG_CONFIG_HOME:-$HOME/.config}/DankMaterialShell/registries.json`. For a new
+file, use:
+
+```json
+[
+  {
+    "name": "marcobeierer",
+    "url": "https://github.com/marcobeierer/dankmaterialshell-plugins.git"
+  }
+]
+```
+
+If the file already exists, append the entry to its array, preserving existing
+registries. Then run `dms plugins install herdrStatus`.
+
+### From a local checkout (development)
+
 From the repository root:
 
 ```sh
@@ -40,6 +72,11 @@ in place. To use a different plugins directory, pass it as an argument:
 ```sh
 ./herdr-status/install.sh "${XDG_CONFIG_HOME:-$HOME/.config}/dms/plugins"
 ```
+
+Use either the development symlink or a registry-managed installation, not both
+for the same plugin ID.
+
+### Enable the widget
 
 In DMS, open **Settings → Plugins**, scan for plugins, enable **Herdr Status**, and
 add it to your DankBar layout.

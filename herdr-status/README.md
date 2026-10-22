@@ -42,7 +42,14 @@ Captured from a running DankBar widget on Hyprland.
 Requires DankMaterialShell **1.6+** and Herdr **0.9.3+** on Linux. Herdr must
 already be running. The widget uses the installed CLI's `herdr agent list` API.
 
-From this project directory:
+For a registry-managed installation, follow the repository's
+[registry setup instructions](../README.md#from-this-registry), then run:
+
+```sh
+dms plugins install herdrStatus
+```
+
+For a development installation, from this plugin directory:
 
 ```sh
 ./install.sh
