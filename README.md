@@ -19,6 +19,10 @@ A native DankBar widget that monitors agents in one local Herdr session.
 No agent plugin or helper daemon is required. Viewing the widget does not mark
 results as read.
 
+| Single status | Every status |
+| --- | --- |
+| ![Single yellow bot with a superscript count of one](herdr-status/screenshots/single-status.png) | ![Green, yellow, red, and blue bots with superscript counts](herdr-status/screenshots/every-status.png) |
+
 Requires Linux, DankMaterialShell **1.6+**, and a running Herdr **0.9.3+** session.
 
 ## Installation

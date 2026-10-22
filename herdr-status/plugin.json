@@ -5,6 +5,7 @@
   "version": "1.0.0",
   "author": "Marco Beierer",
   "homepage": "https://github.com/marcobeierer/dankmaterialshell-plugins",
+  "screenshot": "https://raw.githubusercontent.com/marcobeierer/dankmaterialshell-plugins/main/herdr-status/screenshots/every-status.png",
   "license": "MIT",
   "icon": "smart_toy",
   "type": "widget",

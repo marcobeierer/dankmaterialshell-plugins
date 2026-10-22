@@ -29,6 +29,14 @@ widget does not acknowledge results or change Herdr focus.
 Icons run across horizontal bars and stack on vertical bars. In either mode, a
 connection failure shows a single gray bot without stale counts.
 
+### Screenshots
+
+Captured from a running DankBar widget on Hyprland.
+
+| Single status | Every status |
+| --- | --- |
+| ![Single yellow bot showing one working agent](screenshots/single-status.png) | ![Four idle, zero working, one blocked, and zero unread completed agents](screenshots/every-status.png) |
+
 ## Install
 
 Requires DankMaterialShell **1.6+** and Herdr **0.9.3+** on Linux. Herdr must
