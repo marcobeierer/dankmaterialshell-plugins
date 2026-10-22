@@ -42,14 +42,31 @@ Captured from a running DankBar widget on Hyprland.
 Requires DankMaterialShell **1.6+** and Herdr **0.9.3+** on Linux. Herdr must
 already be running. The widget uses the installed CLI's `herdr agent list` API.
 
-For a registry-managed installation, follow the repository's
-[registry setup instructions](../README.md#from-this-registry), then run:
+### Custom repository (recommended)
+
+Add this repository as a custom DMS registry, then install the plugin:
 
 ```sh
+dms registry add marcobeierer https://github.com/marcobeierer/dankmaterialshell-plugins.git
 dms plugins install herdrStatus
 ```
 
-For a development installation, from this plugin directory:
+Register the repository only once. DMS downloads the plugin from the
+`herdr-status` subdirectory; you do not need to clone the repository or run
+`install.sh`. Herdr itself must be installed separately.
+
+If `dms registry add` is unavailable in your build, use the
+[manual registry configuration](../README.md#manual-registry-configuration).
+
+For future updates:
+
+```sh
+dms plugins update herdrStatus
+```
+
+### Local checkout (development)
+
+From this plugin directory:
 
 ```sh
 ./install.sh
@@ -62,6 +79,10 @@ install dependencies or restart the shell. For a custom plugins directory:
 ```sh
 ./install.sh "${XDG_CONFIG_HOME:-$HOME/.config}/dms/plugins"
 ```
+
+Use either this development symlink or a registry-managed installation, not both.
+
+### Enable the widget
 
 In DMS, open **Settings → Plugins**, scan for plugins, and enable **Herdr Status**.
 Add it to your DankBar layout. Both horizontal and vertical bars are supported.

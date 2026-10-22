@@ -31,15 +31,31 @@ Requires Linux, DankMaterialShell **1.6+**, and a running Herdr **0.9.3+** sessi
 
 ### From this registry
 
-Add the registry once, then install the plugin:
+This repository can be added directly to DMS as a **custom plugin registry**.
+No local checkout or installation script is needed.
+
+1. Register the repository once:
 
 ```sh
 dms registry add marcobeierer https://github.com/marcobeierer/dankmaterialshell-plugins.git
+```
+
+2. Install Herdr Status:
+
+```sh
 dms plugins install herdrStatus
 ```
 
-The repository's `main` branch must contain the catalog entry before DMS can
-discover the plugin. Herdr must be installed separately and running.
+3. [Enable the widget](#enable-the-widget) and add it to DankBar.
+
+Herdr must be installed separately and running. To update a registry-managed
+installation later:
+
+```sh
+dms plugins update herdrStatus
+```
+
+#### Manual registry configuration
 
 If your DMS build does not expose `dms registry add`, configure it through
 `${XDG_CONFIG_HOME:-$HOME/.config}/DankMaterialShell/registries.json`. For a new
