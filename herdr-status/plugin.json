@@ -1,0 +1,15 @@
+{
+  "id": "herdrStatus",
+  "name": "Herdr Status",
+  "description": "See idle, working, blocked, and unread completed agents in DankBar.",
+  "version": "0.1.0",
+  "author": "Marco Beierer",
+  "homepage": "https://www.marcobeierer.com",
+  "icon": "smart_toy",
+  "type": "widget",
+  "capabilities": ["dankbar-widget"],
+  "component": "./HerdrStatus.qml",
+  "settings": "./HerdrSettings.qml",
+  "requires_dms": ">=1.6.0",
+  "permissions": ["settings_read", "settings_write"]
+}
