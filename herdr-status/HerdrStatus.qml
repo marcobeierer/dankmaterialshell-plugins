@@ -54,10 +54,10 @@ PluginComponent {
 
     function statusColor(state) {
         switch (state) {
-        case "blocked": return "#ef5350";
-        case "done": return "#42a5f5";
-        case "working": return "#fdd835";
-        case "idle": return "#66bb6a";
+        case "blocked": return Theme.error;
+        case "done": return Theme.info;
+        case "working": return Theme.warning;
+        case "idle": return Theme.success;
         default: return Theme.surfaceVariantText;
         }
     }
@@ -282,7 +282,7 @@ PluginComponent {
                     textFormat: Text.PlainText
                 }
 
-                ListView {
+                DankListView {
                     width: parent.width
                     implicitHeight: Math.max(0, root.popoutHeight - popout.headerHeight
                         - popout.detailsHeight - sessionLabel.implicitHeight - Theme.spacingXL)
