@@ -1,8 +1,8 @@
 {
   "id": "herdrStatus",
   "name": "Herdr Status",
-  "description": "Monitor local Herdr agents in DankBar with colored bot icons, status counts, and per-widget display settings.",
-  "version": "1.0.0",
+  "description": "Monitor local Herdr app and CLI agents in DankBar with colored bot icons, status counts, and per-widget display settings.",
+  "version": "1.1.0",
   "author": "Marco Beierer",
   "homepage": "https://github.com/marcobeierer/dankmaterialshell-plugins",
   "screenshot": "https://raw.githubusercontent.com/marcobeierer/dankmaterialshell-plugins/main/herdr-status/screenshots/every-status.png",

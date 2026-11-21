@@ -15,8 +15,16 @@ PluginSettings {
     }
 
     StringSetting {
+        settingKey: "herdrAppBinary"
+        label: "Herdr app executable"
+        description: "Command name or absolute path, without arguments. Use an absolute path if DMS cannot find herdr-app."
+        placeholder: "/home/you/.local/bin/herdr-app"
+        defaultValue: "herdr-app"
+    }
+
+    StringSetting {
         settingKey: "herdrBinary"
-        label: "Herdr executable"
+        label: "Herdr CLI executable"
         description: "Command name or absolute path, without arguments. Use an absolute path if DMS cannot find herdr."
         placeholder: "/home/you/.local/bin/herdr"
         defaultValue: "herdr"
@@ -24,8 +32,8 @@ PluginSettings {
 
     StringSetting {
         settingKey: "session"
-        label: "Named session"
-        description: "Leave empty for Herdr's default session. Monitors all agents in the selected session."
+        label: "Herdr CLI session"
+        description: "Leave empty for the CLI's default session."
         placeholder: "Default session"
         defaultValue: ""
     }

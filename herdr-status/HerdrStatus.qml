@@ -12,6 +12,7 @@ PluginComponent {
 
     property var widgetData: null
 
+    readonly property string herdrAppBinary: String(pluginData.herdrAppBinary || "herdr-app").trim() || "herdr-app"
     readonly property string herdrBinary: String(pluginData.herdrBinary || "herdr").trim() || "herdr"
     readonly property string session: String(pluginData.session || "").trim()
     readonly property int pollSeconds: Math.max(1, Math.min(30, Number(pluginData.pollSeconds) || 2))
@@ -26,13 +27,22 @@ PluginComponent {
             return widgetData?.id === id + "_" + index;
         });
     }
-    readonly property string connectionKey: JSON.stringify([herdrBinary, session])
-
-    property var snapshot: null
-    property string errorText: "Connecting to Herdr…"
-    property bool requestPending: false
-    property string requestKey: ""
-    property bool timedOut: false
+    readonly property var sources: [appSource, cliSource]
+    // Agents from every source that answered; null when none did.
+    readonly property var snapshot: {
+        const answered = sources.filter(source => source.agents !== null);
+        return answered.length ? Status.summarize(answered.map(source => source.agents)) : null;
+    }
+    // Problems worth showing even while another source answers: unreadable output.
+    readonly property string readErrors: sources.filter(source => source.unreadable)
+        .map(source => source.error).join("\n")
+    readonly property string errorText: {
+        if (snapshot)
+            return "";
+        if (sources.some(source => !source.answered))
+            return "Connecting to Herdr…";
+        return readErrors || "Herdr is not running. Open the Herdr app or start a Herdr CLI session, or check the executable settings.";
+    }
     readonly property string status: errorText ? "offline" : (snapshot ? snapshot.state : "offline")
     readonly property var agents: errorText || !snapshot ? [] : snapshot.agents
     readonly property var barStates: {
@@ -51,7 +61,7 @@ PluginComponent {
         if (errorText)
             return errorText;
         if (!agents.length)
-            return "No agents in this session";
+            return "No Herdr agents";
         const counts = snapshot.counts;
         return counts.blocked + " need attention · " + counts.done + " ready · "
             + counts.working + " working · " + counts.idle + " idle"
@@ -91,27 +101,9 @@ PluginComponent {
     }
 
     function refresh() {
-        if (requestPending || query.running)
-            return;
-        requestPending = true;
-        requestKey = connectionKey;
-        timedOut = false;
-        const command = [herdrBinary];
-        if (session)
-            command.push("--session", session);
-        command.push("agent", "list");
-        query.command = command;
-        watchdog.restart();
-        query.running = true;
+        appSource.refresh();
+        cliSource.refresh();
     }
-
-    onConnectionKeyChanged: {
-        snapshot = null;
-        errorText = "Connecting to Herdr…";
-        Qt.callLater(refresh);
-    }
-
-    Component.onCompleted: Qt.callLater(refresh)
 
     Timer {
         interval: root.pollSeconds * 1000
@@ -120,45 +112,110 @@ PluginComponent {
         onTriggered: root.refresh()
     }
 
-    Timer {
-        id: watchdog
-        interval: 5000
-        onTriggered: {
-            root.timedOut = true;
-            root.errorText = "Herdr did not respond. Check the executable and session settings.";
-            root.requestPending = false;
-            // Only terminate our read-only CLI child, never the Herdr server.
-            query.signal(9);
-        }
+    HerdrSource {
+        id: appSource
+        name: "Herdr app"
+        kind: "app"
+        command: [root.herdrAppBinary, "ls"]
     }
 
-    Process {
-        id: query
+    HerdrSource {
+        id: cliSource
+        name: "Herdr CLI"
+        kind: "cli"
+        command: root.session ? [root.herdrBinary, "--session", root.session, "agent", "list"]
+            : [root.herdrBinary, "agent", "list"]
         // A desktop widget must not accidentally inherit a pane's socket override.
         environment: ({ HERDR_SOCKET_PATH: null, HERDR_SESSION: null })
-        stdout: StdioCollector {
-            id: output
-            onStreamFinished: {
-                if (root.timedOut || root.requestKey !== root.connectionKey)
-                    return;
-                try {
-                    root.snapshot = Status.parse(text);
-                    root.errorText = "";
-                } catch (error) {
-                    root.errorText = "Cannot read Herdr status: " + error.message;
-                }
+    }
+
+    // One bounded, non-overlapping read-only poll of one Herdr source.
+    component HerdrSource: QtObject {
+        id: source
+
+        required property string name
+        required property string kind
+        required property var command
+        property var environment: ({})
+
+        // Agents from the last successful poll; null while unavailable, so a
+        // failed request never leaves stale counts.
+        property var agents: null
+        property string error: ""
+        property bool unreadable: false
+        property bool answered: false
+        property bool pending: false
+        property bool timedOut: false
+        property string requestKey: ""
+        readonly property string key: JSON.stringify([command, environment])
+
+        function fail(message, outputUnreadable) {
+            agents = null;
+            error = message;
+            unreadable = outputUnreadable;
+            answered = true;
+        }
+
+        function refresh() {
+            if (pending || process.running)
+                return;
+            pending = true;
+            requestKey = key;
+            timedOut = false;
+            process.command = command;
+            process.environment = environment;
+            watchdog.restart();
+            process.running = true;
+        }
+
+        onKeyChanged: {
+            agents = null;
+            error = "";
+            unreadable = false;
+            answered = false;
+            Qt.callLater(refresh);
+        }
+
+        Component.onCompleted: Qt.callLater(refresh)
+
+        property Timer watchdog: Timer {
+            interval: 5000
+            onTriggered: {
+                source.timedOut = true;
+                source.pending = false;
+                source.fail(source.name + " did not respond.", false);
+                // Only terminate our read-only CLI child, never Herdr itself.
+                source.process.signal(9);
             }
         }
-        stderr: StdioCollector {}
-        onExited: (exitCode, exitStatus) => {
-            watchdog.stop();
-            root.requestPending = false;
-            if (root.requestKey !== root.connectionKey) {
-                Qt.callLater(root.refresh);
-                return;
+
+        property Process process: Process {
+            stdout: StdioCollector {
+                onStreamFinished: {
+                    // An empty reply is a failed request, reported on exit.
+                    if (source.timedOut || source.requestKey !== source.key || !text.trim())
+                        return;
+                    try {
+                        source.agents = source.kind === "app" ? Status.parseApp(text) : Status.parseCli(text);
+                        source.error = "";
+                        source.unreadable = false;
+                        source.answered = true;
+                    } catch (error) {
+                        source.fail("Cannot read " + source.name + " status: " + error.message, true);
+                    }
+                }
             }
-            if (exitCode !== 0 && !root.timedOut)
-                root.errorText = "Herdr is unavailable. Start Herdr or check the executable and session settings.";
+            stderr: StdioCollector {}
+            onExited: (exitCode, exitStatus) => {
+                source.watchdog.stop();
+                source.pending = false;
+                if (source.requestKey !== source.key) {
+                    Qt.callLater(source.refresh);
+                    return;
+                }
+                if (exitCode !== 0 && !source.timedOut)
+                    source.fail(source.name + " is not running.", false);
+            }
         }
     }
 
@@ -362,20 +419,23 @@ PluginComponent {
                 height: visible ? implicitHeight : 0
 
                 StyledText {
-                    id: sessionLabel
+                    id: readErrorsLabel
                     width: parent.width
+                    visible: root.snapshot !== null && root.readErrors.length > 0
+                    height: visible ? implicitHeight : 0
                     leftPadding: Theme.spacingS
                     bottomPadding: Theme.spacingM
-                    text: root.session ? "Session: " + root.session : "Default session"
-                    color: Theme.surfaceVariantText
+                    text: root.readErrors
+                    color: Theme.error
                     font.pixelSize: Theme.fontSizeSmall
+                    wrapMode: Text.WordWrap
                     textFormat: Text.PlainText
                 }
 
                 DankListView {
                     width: parent.width
                     implicitHeight: Math.max(0, root.popoutHeight - popout.headerHeight
-                        - popout.detailsHeight - sessionLabel.implicitHeight - Theme.spacingXL)
+                        - popout.detailsHeight - readErrorsLabel.height - Theme.spacingXL)
                     clip: true
                     spacing: Theme.spacingS
                     model: root.agents
@@ -418,7 +478,8 @@ PluginComponent {
 
                             StyledText {
                                 width: parent.width
-                                text: agentRow.modelData.paneId + " · " + agentRow.modelData.directory
+                                text: (agentRow.modelData.source === "app" ? "App" : "CLI") + " · "
+                                    + agentRow.modelData.id + " · " + agentRow.modelData.detail
                                 font.pixelSize: Theme.fontSizeSmall
                                 color: Theme.surfaceVariantText
                                 elide: Text.ElideMiddle

@@ -1,7 +1,7 @@
 # Native QML widget using Herdr's CLI
 
 - Date: 2026-10-22
-- Status: accepted
+- Status: superseded by [0002](0002-herdr-app-window-status.md)
 
 ## Context
 

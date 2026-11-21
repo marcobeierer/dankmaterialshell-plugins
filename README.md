@@ -38,7 +38,8 @@ See the [Window Picker README](window-picker/README.md) for shortcut examples.
 
 ### [Herdr Status](herdr-status/)
 
-A native DankBar widget that monitors agents in one local Herdr session.
+A native DankBar widget that monitors local Herdr agents, in the Herdr app window
+and in a Herdr CLI session, combined.
 
 - Colored bot icons with small superscript agent counts.
 - A compact single-status mode, or separate icons in **green → yellow → red →
@@ -55,7 +56,8 @@ results as read.
 | --- | --- |
 | ![Single yellow bot with a superscript count of one](herdr-status/screenshots/single-status.png) | ![Green, yellow, red, and blue bots with superscript counts](herdr-status/screenshots/every-status.png) |
 
-Requires Linux, DankMaterialShell **1.6+**, and a running Herdr **0.9.3+** session.
+Requires Linux, DankMaterialShell **1.6+**, and an open Herdr app window
+(`herdr-app`, tested with **0.1.16**) or a running Herdr CLI **0.9.3+** session.
 
 ## Installation
 

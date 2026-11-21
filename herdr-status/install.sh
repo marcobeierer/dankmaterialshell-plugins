@@ -41,5 +41,5 @@ fi
 
 printf '\nIn DMS: Settings → Plugins → Scan for Plugins → enable Herdr Status.\n'
 printf 'Then add the widget to your DankBar layout.\n'
-printf 'Requires DMS 1.6+ and a running Herdr 0.9.3+ session.\n'
+printf 'Requires DMS 1.6+ and an open Herdr app window or a running Herdr CLI session.\n'
 printf 'Keep this source directory in place; the installation is a symlink.\n'
