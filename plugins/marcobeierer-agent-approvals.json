@@ -1,0 +1,14 @@
+{
+    "id": "agentApprovals",
+    "name": "Agent Approvals",
+    "capabilities": ["daemon"],
+    "category": "utilities",
+    "repo": "https://github.com/marcobeierer/dankmaterialshell-plugins",
+    "path": "agent-approvals",
+    "author": "Marco Beierer",
+    "description": "Approve OpenCode, Codex, and Claude Code permission requests from a contextual notification on the focused monitor.",
+    "dependencies": ["python3"],
+    "compositors": ["hyprland", "niri"],
+    "distro": ["any"],
+    "requires_dms": ">=1.6.2"
+}

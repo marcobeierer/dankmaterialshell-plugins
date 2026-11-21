@@ -1,0 +1,8 @@
+{
+  "name": "opencode-dms-agent-approvals",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": { ".": "./index.js" },
+  "dependencies": { "@opencode/plugin": "2.2.1" }
+}

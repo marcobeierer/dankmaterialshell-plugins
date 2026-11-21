@@ -6,6 +6,18 @@ contains the registry catalog; plugin source lives in its own subdirectory.
 
 ## Plugins
 
+### [Agent Approvals](agent-approvals/)
+
+Answer **OpenCode V2, Codex, and Claude Code** permission requests from a
+persistent notification card on your focused monitor. See the project, session,
+requested command or path, and expandable full arguments/edits before choosing
+**Allow once**, **Deny**, or **Use terminal**. Concurrent requests are queued.
+
+Install with `dms plugins install agentApprovals` or
+`./agent-approvals/install.sh`, enable **Agent Approvals** in **Settings → Plugins**,
+then [connect your agents](agent-approvals/README.md#connect-your-agents).
+Requires DMS **1.6.2+**, Python 3, and Hyprland or Niri; no bar widget is needed.
+
 ### [Window Picker](window-picker/)
 
 A shortcut-triggered window picker for **Hyprland** and **Niri**. Lists open windows
